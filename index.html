@@ -163,45 +163,40 @@
         function addProduct() {
             let table = document.getElementById("productTable");
             let row = document.createElement("tr");
-            row.innerHTML = `
+            row.innerHTML = ` 
                 <td><input type="text" value="" disabled></td>
-                <td><input type="number" value="" disabled></td>
-                <td><input type="number" value="" disabled></td>
+                <td><input type="number" value="0" disabled onchange="updateRowCalculations(this)"></td>
+                <td><input type="number" value="0" disabled onchange="updateRowCalculations(this)"></td>
                 <td>$0</td>
                 <td>$0</td>
                 <td>0</td>
-                <td class="hidden price"><input type="number" value="" disabled></td>
-                <td class="hidden profitPerPiece"><input type="number" value="" disabled></td>
+                <td class="hidden price"><input type="number" value="0" disabled onchange="updateRowCalculations(this)"></td>
+                <td class="hidden profitPerPiece"><input type="number" value="0" disabled onchange="updateRowCalculations(this)"></td>
             `;
             table.appendChild(row);
-
-            // Add event listeners to the new inputs for calculating the values
-            let inputs = row.querySelectorAll("input");
-            inputs.forEach((input, index) => {
-                input.addEventListener("input", () => {
-                    updateRow(row); // Recalculate totals when input changes
-                });
-            });
-
             saveData();
             updateChart();
         }
 
-        function updateRow(row) {
-            const qty = row.querySelector('td:nth-child(2) input').value;
-            const sold = row.querySelector('td:nth-child(3) input').value;
-            const price = row.querySelector('.price input').value;
-            const profitPerPiece = row.querySelector('.profitPerPiece input').value;
+        function updateRowCalculations(input) {
+            let row = input.closest('tr');
+            let quantity = parseFloat(row.querySelector('td:nth-child(2) input').value) || 0;
+            let sold = parseFloat(row.querySelector('td:nth-child(3) input').value) || 0;
+            let price = parseFloat(row.querySelector('.price input').value) || 0;
+            let profitPerPiece = parseFloat(row.querySelector('.profitPerPiece input').value) || 0;
 
             // Calculate Total Sale, Profit, and Quantity Left
-            const totalSale = sold * price;
-            const profit = sold * profitPerPiece;
-            const quantityLeft = qty - sold;
+            let totalSale = sold * price;
+            let profit = sold * profitPerPiece;
+            let quantityLeft = quantity - sold;
 
-            // Update the corresponding cells in the row
-            row.querySelector('td:nth-child(4)').textContent = `$${totalSale}`;
-            row.querySelector('td:nth-child(5)').textContent = `$${profit}`;
+            // Update the row with the calculated values
+            row.querySelector('td:nth-child(4)').textContent = `$${totalSale.toFixed(2)}`;
+            row.querySelector('td:nth-child(5)').textContent = `$${profit.toFixed(2)}`;
             row.querySelector('td:nth-child(6)').textContent = quantityLeft;
+
+            // Save the updated data
+            saveData();
         }
 
         function saveData() {
@@ -222,18 +217,15 @@
                 let row = document.createElement("tr");
                 row.innerHTML = ` 
                     <td><input type="text" value="${rowData[0]}" disabled></td>
-                    <td><input type="number" value="${rowData[1]}" disabled></td>
-                    <td><input type="number" value="${rowData[2]}" disabled></td>
+                    <td><input type="number" value="${rowData[1]}" disabled onchange="updateRowCalculations(this)"></td>
+                    <td><input type="number" value="${rowData[2]}" disabled onchange="updateRowCalculations(this)"></td>
                     <td>$0</td>
                     <td>$0</td>
                     <td>0</td>
-                    <td class="hidden price"><input type="number" value="${rowData[3]}" disabled></td>
-                    <td class="hidden profitPerPiece"><input type="number" value="${rowData[4]}" disabled></td>
+                    <td class="hidden price"><input type="number" value="${rowData[3]}" disabled onchange="updateRowCalculations(this)"></td>
+                    <td class="hidden profitPerPiece"><input type="number" value="${rowData[4]}" disabled onchange="updateRowCalculations(this)"></td>
                 `;
                 table.appendChild(row);
-
-                // Update the row with calculated values
-                updateRow(row);
             });
         }
 
@@ -260,5 +252,3 @@
     </script>
 </body>
 </html>
-
-
