@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Main Page</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            background-color: black;
+            margin: 0;
+            padding: 0;
+            color: white;
+            font-family: Arial, sans-serif;
+        }
+        .bar {
+            width: 100vw;
+            height: 100px;
+            background: url('https://i.imgur.com/rJpjUtV.png') repeat-x;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .bar img {
+            height: 80px;
+        }
+        .container {
+            padding: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: black;
+            color: white;
+            border: 2px solid yellow;
+        }
+        th, td {
+            border: 1px solid yellow;
+            padding: 10px;
+            text-align: center;
+        }
+        .hidden {
+            display: none;
+        }
+        button {
+            margin-top: 10px;
+            padding: 10px;
+            cursor: pointer;
+        }
+        input {
+            background: black;
+            color: white;
+            border: 1px solid yellow;
+            text-align: center;
+        }
+        canvas {
+            margin-top: 20px;
+            background: white;
+            border-radius: 10px;
+        }
+        .passcode-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: black;
+            color: white;
+            font-family: Arial, sans-serif;
+            position: relative;
+        }
+        .passcode-box {
+            text-align: center;
+            background-color: black;
+            border: 2px solid yellow;
+            padding: 20px;
+            border-radius: 10px;
+            position: relative;
+            z-index: 1;
+        }
+        .passcode-container .passcode-bar {
+            width: 100vw;
+            height: 100px;
+            background: url('https://i.imgur.com/rJpjUtV.png') repeat-x;
+            position: absolute;
+            top: 50%;  /* Center the bar in the middle of the page */
+            left: 0;
+            z-index: 0;
+            transform: translateY(-50%); /* Adjust to center */
+        }
+        .passcode-container img {
+            position: absolute;
+            top: -130px; /* Position above the passcode box */
+            left: 50%;
+            transform: translateX(-50%);
+            height: 60px; /* Image size */
+            z-index: 1;
+        }
+    </style>
+</head>
+<body>
+    <div id="passcodePage" class="passcode-container">
+        <div class="passcode-bar"></div> <!-- Bar in the middle behind passcode -->
+        <img src="https://i.imgur.com/CnarTQM.png" alt="Centered Image"> <!-- Image above passcode -->
+        <div class="passcode-box">
+            <h2>Enter Passcode</h2>
+            <input type="password" id="passcodeInput" placeholder="Enter passcode" />
+            <button onclick="checkPasscode()">Submit</button>
+        </div>
+    </div>
+
+    <div id="mainPage" style="display: none;">
+        <div class="bar">
+            <img src="https://i.imgur.com/CnarTQM.png" alt="Centered Image">
+        </div>
+        <div class="container">
+            <button id="editButton" onclick="toggleEditMode()">Edit</button>
+            <button onclick="addProduct()">Add Product</button>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Product Name</th>
+                        <th>Quantity</th>
+                        <th>Sold</th>
+                        <th>Total Sale</th>
+                        <th>Profit</th>
+                        <th>Quantity Left</th>
+                        <th class="hidden price">Price</th>
+                        <th class="hidden profitPerPiece">Profit per Piece</th>
+                    </tr>
+                </thead>
+                <tbody id="productTable">
+                </tbody>
+            </table>
+            <canvas id="salesChart" width="400" height="200"></canvas>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            loadSavedData();
+            updateChart();
+        });
+
+        function checkPasscode() {
+            const passcode = document.getElementById('passcodeInput').value;
+            const correctPasscode = '258046'; // Changed the passcode here
+
+            if (passcode === correctPasscode) {
+                document.getElementById('passcodePage').style.display = 'none';
+                document.getElementById('mainPage').style.display = 'block';
+            } else {
+                alert('Incorrect passcode!');
+            }
+        }
+
+        function toggleEditMode() {
+            let button = document.getElementById('editButton');
+            let isEditing = button.textContent === "Done Editing";
+            let hiddenCols = document.querySelectorAll('.price, .profitPerPiece');
+            let inputs = document.querySelectorAll('input');
+            
+            hiddenCols.forEach(col => {
+                col.style.display = isEditing ? "none" : "table-cell";
+            });
+            
+            inputs.forEach(input => {
+                input.disabled = isEditing;
+            });
+            
+            if (isEditing) {
+                saveData();
+                updateChart();
+            }
+            
+            button.textContent = isEditing ? "Edit" : "Done Editing";
+        }
+
+        function addProduct() {
+            let table = document.getElementById("productTable");
+            let row = document.createElement("tr");
+            row.innerHTML = `
+                <td><input type="text" value="" disabled></td>
+                <td><input type="number" value="" disabled></td>
+                <td><input type="number" value="" disabled></td>
+                <td>$0</td>
+                <td>$0</td>
+                <td>0</td>
+                <td class="hidden price"><input type="number" value="" disabled></td>
+                <td class="hidden profitPerPiece"><input type="number" value="" disabled></td>
+            `;
+            table.appendChild(row);
+            saveData();
+            updateChart();
+        }
+
+        function saveData() {
+            let tableData = [];
+            document.querySelectorAll("#productTable tr").forEach(row => {
+                let inputs = row.querySelectorAll("input");
+                let rowData = [];
+                inputs.forEach(input => rowData.push(input.value));
+                tableData.push(rowData);
+            });
+            localStorage.setItem("productData", JSON.stringify(tableData));
+        }
+
+        function loadSavedData() {
+            let table = document.getElementById("productTable");
+            let savedData = JSON.parse(localStorage.getItem("productData")) || [];
+            savedData.forEach(rowData => {
+                let row = document.createElement("tr");
+                row.innerHTML = `
+                    <td><input type="text" value="${rowData[0]}" disabled></td>
+                    <td><input type="number" value="${rowData[1]}" disabled></td>
+                    <td><input type="number" value="${rowData[2]}" disabled></td>
+                    <td>$0</td>
+                    <td>$0</td>
+                    <td>0</td>
+                    <td class="hidden price"><input type="number" value="${rowData[3]}" disabled></td>
+                    <td class="hidden profitPerPiece"><input type="number" value="${rowData[4]}" disabled></td>
+                `;
+                table.appendChild(row);
+            });
+        }
+
+        function updateChart() {
+            let ctx = document.getElementById('salesChart').getContext('2d');
+            let salesData = JSON.parse(localStorage.getItem("salesData")) || [0, 0, 0, 0, 0, 0, 0];
+            let today = new Date().getDay();
+            salesData[today] = document.querySelectorAll("#productTable tr").length;
+            localStorage.setItem("salesData", JSON.stringify(salesData));
+            
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
+                    datasets: [{
+                        label: 'Daily Sales',
+                        data: salesData,
+                        borderColor: 'yellow',
+                        backgroundColor: 'rgba(255, 255, 0, 0.2)',
+                    }]
+                }
+            });
+        }
+    </script>
+</body>
+</html>
