@@ -67,7 +67,6 @@
             background-color: black;
             color: white;
             font-family: Arial, sans-serif;
-            position: relative;
         }
         .passcode-box {
             text-align: center;
@@ -75,33 +74,11 @@
             border: 2px solid yellow;
             padding: 20px;
             border-radius: 10px;
-            position: relative;
-            z-index: 1;
-        }
-        .passcode-container .passcode-bar {
-            width: 100vw;
-            height: 100px;
-            background: url('https://i.imgur.com/rJpjUtV.png') repeat-x;
-            position: absolute;
-            top: 50%;  /* Center the bar in the middle of the page */
-            left: 0;
-            z-index: 0;
-            transform: translateY(-50%); /* Adjust to center */
-        }
-        .passcode-container img {
-            position: absolute;
-            top: -130px; /* Position above the passcode box */
-            left: 50%;
-            transform: translateX(-50%);
-            height: 60px; /* Image size */
-            z-index: 1;
         }
     </style>
 </head>
 <body>
     <div id="passcodePage" class="passcode-container">
-        <div class="passcode-bar"></div> <!-- Bar in the middle behind passcode -->
-        <img src="https://i.imgur.com/CnarTQM.png" alt="Centered Image"> <!-- Image above passcode -->
         <div class="passcode-box">
             <h2>Enter Passcode</h2>
             <input type="password" id="passcodeInput" placeholder="Enter passcode" />
@@ -144,7 +121,7 @@
 
         function checkPasscode() {
             const passcode = document.getElementById('passcodeInput').value;
-            const correctPasscode = '258046'; // Changed the passcode here
+            const correctPasscode = '258046'; // Change this to your desired passcode
 
             if (passcode === correctPasscode) {
                 document.getElementById('passcodePage').style.display = 'none';
@@ -156,24 +133,31 @@
 
         function toggleEditMode() {
             let button = document.getElementById('editButton');
-            let isEditing = button.textContent === "Done Editing";
+            let isEditing = button.textContent === "Done Editing"; // Check if it's in "Done Editing" mode
             let hiddenCols = document.querySelectorAll('.price, .profitPerPiece');
             let inputs = document.querySelectorAll('input');
             
+            // Toggle visibility of the hidden columns
             hiddenCols.forEach(col => {
-                col.style.display = isEditing ? "none" : "table-cell";
+                col.style.display = isEditing ? "none" : "table-cell";  // Hide or show the columns
             });
-            
+
+            // Enable or disable the inputs based on whether we're in editing mode
             inputs.forEach(input => {
-                input.disabled = isEditing;
+                input.disabled = isEditing;  // Disable inputs when not editing
             });
-            
+
+            // Change button text based on the current mode
             if (isEditing) {
-                saveData();
-                updateChart();
+                button.textContent = "Edit";  // Return to "Edit" mode
+            } else {
+                button.textContent = "Done Editing";  // Switch to "Done Editing" mode
             }
             
-            button.textContent = isEditing ? "Edit" : "Done Editing";
+            if (!isEditing) {
+                saveData();  // Save data when "Done Editing" is clicked
+                updateChart();  // Update chart data
+            }
         }
 
         function addProduct() {
@@ -210,7 +194,7 @@
             let savedData = JSON.parse(localStorage.getItem("productData")) || [];
             savedData.forEach(rowData => {
                 let row = document.createElement("tr");
-                row.innerHTML = `
+                row.innerHTML = ` 
                     <td><input type="text" value="${rowData[0]}" disabled></td>
                     <td><input type="number" value="${rowData[1]}" disabled></td>
                     <td><input type="number" value="${rowData[2]}" disabled></td>
@@ -247,3 +231,4 @@
     </script>
 </body>
 </html>
+
