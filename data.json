@@ -1,0 +1,18 @@
+{
+    "products": [
+        {
+            "name": "Vape Juice",
+            "quantity": 50,
+            "sold": 10,
+            "price": 200,
+            "profitPerPiece": 50
+        },
+        {
+            "name": "Coil",
+            "quantity": 30,
+            "sold": 5,
+            "price": 100,
+            "profitPerPiece": 20
+        }
+    ]
+}
